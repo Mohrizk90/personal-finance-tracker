@@ -1,10 +1,10 @@
-# Multi-stage build
-FROM node:18-alpine AS builder
+# Use Node.js 18
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first
 COPY package*.json ./
 COPY client/package*.json ./client/
 
@@ -12,32 +12,25 @@ COPY client/package*.json ./client/
 RUN npm install
 RUN cd client && npm install
 
-# Copy source code
-COPY . .
+# Copy all files explicitly
+COPY server/ ./server/
+COPY client/ ./client/
+COPY Procfile ./
+COPY railway.json ./
+COPY env.example ./
+
+# Debug: List files to verify copying
+RUN echo "=== Root directory ==="
+RUN ls -la /app/
+RUN echo "=== Client directory ==="
+RUN ls -la /app/client/
+RUN echo "=== Client public directory ==="
+RUN ls -la /app/client/public/
+RUN echo "=== Looking for index.html ==="
+RUN find /app -name "index.html" -type f
 
 # Build React app
 RUN cd client && npm run build
-
-# Production stage
-FROM node:18-alpine AS production
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install only production dependencies (omit dev dependencies)
-RUN npm install --omit=dev
-
-# Copy built React app from builder stage
-COPY --from=builder /app/client/build ./client/build
-
-# Copy server files
-COPY server/ ./server/
-
-# Copy other necessary files
-COPY Procfile ./
-COPY railway.json ./
 
 # Expose port
 EXPOSE 3000
