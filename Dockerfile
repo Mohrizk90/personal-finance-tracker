@@ -26,8 +26,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm install --only=production
+# Install only production dependencies (omit dev dependencies)
+RUN npm install --omit=dev
 
 # Copy built React app from builder stage
 COPY --from=builder /app/client/build ./client/build

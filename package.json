@@ -9,7 +9,6 @@
     "server": "nodemon server/index.js",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
-    "postinstall": "cd client && npm install",
     "install-all": "npm install && cd client && npm install"
   },
   "dependencies": {
