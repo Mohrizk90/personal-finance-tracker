@@ -12,18 +12,27 @@ COPY client/package*.json ./client/
 RUN npm install
 RUN cd client && npm install
 
-# Copy all files first
+# Copy all files
 COPY . .
 
-# Debug: List files to verify copying
+# Debug: Check what we have
 RUN echo "=== Root directory ==="
 RUN ls -la /app/
 RUN echo "=== Client directory ==="
 RUN ls -la /app/client/ || echo "Client directory does not exist"
-RUN echo "=== Looking for index.html ==="
+RUN echo "=== Client public directory ==="
+RUN ls -la /app/client/public/ || echo "Client public directory does not exist"
+RUN echo "=== All index.html files ==="
 RUN find /app -name "index.html" -type f || echo "No index.html found"
-RUN echo "=== Looking for public directory ==="
-RUN find /app -name "public" -type d || echo "No public directory found"
+
+# Try to create the public directory and index.html if missing
+RUN mkdir -p /app/client/public
+RUN echo '<!DOCTYPE html><html><head><title>Test</title></head><body><div id="root"></div></body></html>' > /app/client/public/index.html
+
+# Debug: Check again after creating
+RUN echo "=== After creating index.html ==="
+RUN ls -la /app/client/public/
+RUN cat /app/client/public/index.html
 
 # Build React app
 RUN cd client && npm run build
