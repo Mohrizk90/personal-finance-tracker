@@ -12,22 +12,18 @@ COPY client/package*.json ./client/
 RUN npm install
 RUN cd client && npm install
 
-# Copy all files explicitly
-COPY server/ ./server/
-COPY client/ ./client/
-COPY Procfile ./
-COPY railway.json ./
-COPY env.example ./
+# Copy all files first
+COPY . .
 
 # Debug: List files to verify copying
 RUN echo "=== Root directory ==="
 RUN ls -la /app/
 RUN echo "=== Client directory ==="
-RUN ls -la /app/client/
-RUN echo "=== Client public directory ==="
-RUN ls -la /app/client/public/
+RUN ls -la /app/client/ || echo "Client directory does not exist"
 RUN echo "=== Looking for index.html ==="
-RUN find /app -name "index.html" -type f
+RUN find /app -name "index.html" -type f || echo "No index.html found"
+RUN echo "=== Looking for public directory ==="
+RUN find /app -name "public" -type d || echo "No public directory found"
 
 # Build React app
 RUN cd client && npm run build
